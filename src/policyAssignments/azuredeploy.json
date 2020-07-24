@@ -1,0 +1,35 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "managementGroupId": {
+			"type": "string",
+			"metadata": {
+				"description": "Management Group ID where to target assignments."
+			}
+		}
+    },
+    "variables": {
+        "managementGroupResourceId": "[tenantResourceId('Microsoft.Management/managementGroups', parameters('managementGroupId'))]"
+    },  
+    "resources": [
+        {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "apiVersion": "2019-09-01",
+            "name": "network-protection",
+            "properties": {
+                "scope": "[variables('managementGroupResourceId')]",
+                "policyDefinitionId": "[concat(variables('managementGroupResourceId'), '/providers/Microsoft.Authorization/policySetDefinitions/network-protection')]"
+            }
+        },
+        {
+            "type": "Microsoft.Authorization/policyAssignments",
+            "apiVersion": "2019-09-01",
+            "name": "storage-acct-protection",
+            "properties": {
+                "scope": "[variables('managementGroupResourceId')]",
+                "policyDefinitionId": "[concat(variables('managementGroupResourceId'), '/providers/Microsoft.Authorization/policySetDefinitions/storage-account-protection')]"
+            }
+        }
+    ]
+}

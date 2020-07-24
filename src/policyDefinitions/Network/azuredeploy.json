@@ -1,0 +1,31 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {},
+	"resources": [
+		{
+			"type": "Microsoft.Authorization/policyDefinitions",
+			"apiVersion": "2019-06-01",
+			"name": "deny-public-ipaddresses",
+			"properties": {
+				"mode": "Indexed",
+				"displayName": "Deny Public IP Addresses",
+				"description": "This policy denies the creation of Public IP Addresses.",
+				"metadata": {
+					"version": "1.0.0",
+					"category": "Network"
+				},
+				"parameters": {},
+				"policyRule": {
+					"if": {
+						"field": "type",
+						"equals": "Microsoft.Network/publicIPAddresses"
+					},
+					"then": {
+						"effect": "deny"
+					}
+				}
+			}
+		}
+	]
+}

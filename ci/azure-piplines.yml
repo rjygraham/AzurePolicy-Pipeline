@@ -1,0 +1,34 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+- stage: PUBLISH
+  displayName: 'Publish Templates'
+  jobs:
+  - job: PUBLISH
+    displayName: 'Publish Templates'
+    steps:
+    - task: PublishPipelineArtifact@1
+      inputs: 
+        targetPath: '$(Build.SourcesDirectory)/src'
+        artifactName: 'templates'
+
+- stage: DEV
+  variables:
+    Environment: 'DEV'
+  displayName: '${{ variables.Environment }}'
+  dependsOn: PUBLISH
+  jobs:
+  - deployment: '${{ variables.Environment }}'
+    displayName: 'Deploy Policies, Initiatives, and Assignments to ${{ variables.Environment }}'
+    environment: '${{ variables.Environment }}'
+    strategy: 
+      runOnce:
+        deploy:
+          steps:
+          - template: environment-steps.yml
+            parameters:
+              ManagementGroupId: $(DevManagementGroupId)

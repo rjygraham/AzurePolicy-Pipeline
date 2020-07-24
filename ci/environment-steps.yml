@@ -1,0 +1,60 @@
+parameters:
+  ManagementGroupId: ''
+
+steps:
+
+# Policies
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'Deploy Network Policies.'
+  inputs:
+    deploymentScope: 'Management Group'
+    azureResourceManagerConnection: 'AZURE-POLICY'
+    location: 'East US'
+    templateLocation: 'Linked artifact'
+    csmFile: '$(Pipeline.Workspace)/templates/policyDefinitions/Network/azuredeploy.json'
+    deploymentMode: 'Incremental'
+
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'Deploy Storage Account Policies.'
+  inputs:
+    deploymentScope: 'Management Group'
+    azureResourceManagerConnection: 'AZURE-POLICY'
+    location: 'East US'
+    templateLocation: 'Linked artifact'
+    csmFile: '$(Pipeline.Workspace)/templates/policyDefinitions/Storage/azuredeploy.json'
+    deploymentMode: 'Incremental'
+
+# Initiatives
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'Deploy Network Initiatives.'
+  inputs:
+    deploymentScope: 'Management Group'
+    azureResourceManagerConnection: 'AZURE-POLICY'
+    location: 'East US'
+    templateLocation: 'Linked artifact'
+    csmFile: '$(Pipeline.Workspace)/templates/policySetDefinitions/Network/azuredeploy.json'
+    overrideParameters: '-managementGroupId ${{ parameters.ManagementGroupId }}'
+    deploymentMode: 'Incremental'
+
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'Deploy Storage Account Initiatives.'
+  inputs:
+    deploymentScope: 'Management Group'
+    azureResourceManagerConnection: 'AZURE-POLICY'
+    location: 'East US'
+    templateLocation: 'Linked artifact'
+    csmFile: '$(Pipeline.Workspace)/templates/policySetDefinitions/Storage/azuredeploy.json'
+    overrideParameters: '-managementGroupId ${{ parameters.ManagementGroupId }}'
+    deploymentMode: 'Incremental'
+
+# Assignments
+- task: AzureResourceManagerTemplateDeployment@3
+  displayName: 'Deploy Policy Assignments.'
+  inputs:
+    deploymentScope: 'Management Group'
+    azureResourceManagerConnection: 'AZURE-POLICY'
+    location: 'East US'
+    templateLocation: 'Linked artifact'
+    csmFile: '$(Pipeline.Workspace)/templates/policyAssignments/azuredeploy.json'
+    overrideParameters: '-managementGroupId ${{ parameters.ManagementGroupId }}'
+    deploymentMode: 'Incremental'

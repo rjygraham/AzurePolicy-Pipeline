@@ -1,0 +1,88 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"managementGroupId": {
+			"type": "string",
+			"metadata": {
+				"description": "Management Group ID where policy definitions have been created."
+			}
+		},
+		"exceptionTagName": {
+			"type": "string",
+			"defaultValue": "Exception",
+			"metadata": {
+				"description": "Tag name to be used for managing exceptions."
+			}
+		},
+		"denyBlobPublicAccessExceptionValue": {
+			"type": "string",
+			"defaultValue": "AllowPublicBlob",
+			"metadata": {
+				"description": "Tag value to override the Deny Storage Account Blob Anonymous Access policy."
+			}
+		},
+		"denyStorageAccountPublicAccessExceptionValue": {
+			"type": "string",
+			"defaultValue": "AllowPublicStorageAccount",
+			"metadata": {
+				"description": "Tag value to override the Deny Storage Account Blob Anonymous Access policy."
+			}
+		},
+		"denyStorageAccountIPRulesExceptionValue": {
+			"type": "string",
+			"defaultValue": "AllowStorageAccountIPRules",
+			"metadata": {
+				"description": "Tag value to override the Deny Storage Account Blob Anonymous Access policy."
+			}
+		}
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Authorization/policySetDefinitions",
+			"apiVersion": "2019-06-01",
+			"name": "storage-account-protection",
+			"properties": {
+				"displayName": "Storage Account Protection",
+				"description": "This initiative contains a collection of policies to prevent exfiltration of data from Storage Accounts.",
+				"metadata": {},
+				"parameters": {},
+				"policyDefinitions": [
+					{
+						"policyDefinitionId": "[concat('/providers/Microsoft.Management/managementGroups/', parameters('managementGroupId'), '/providers/Microsoft.Authorization/policyDefinitions/deny-blob-public-access')]",
+						"parameters": {
+							"tagName": {
+								"value": "[parameters('exceptionTagName')]"
+							},
+							"tagValue": {
+								"value": "[parameters('denyBlobPublicAccessExceptionValue')]"
+							}
+						}
+					},
+					{
+						"policyDefinitionId": "[concat('/providers/Microsoft.Management/managementGroups/', parameters('managementGroupId'), '/providers/Microsoft.Authorization/policyDefinitions/deny-storage-account-public-access')]",
+						"parameters": {
+							"tagName": {
+								"value": "[parameters('exceptionTagName')]"
+							},
+							"tagValue": {
+								"value": "[parameters('denyStorageAccountPublicAccessExceptionValue')]"
+							}
+						}
+					},
+					{
+						"policyDefinitionId": "[concat('/providers/Microsoft.Management/managementGroups/', parameters('managementGroupId'), '/providers/Microsoft.Authorization/policyDefinitions/deny-storage-account-iprules')]",
+						"parameters": {
+							"tagName": {
+								"value": "[parameters('exceptionTagName')]"
+							},
+							"tagValue": {
+								"value": "[parameters('denyStorageAccountIPRulesExceptionValue')]"
+							}
+						}
+					}
+				]
+			}
+		}
+	]
+}

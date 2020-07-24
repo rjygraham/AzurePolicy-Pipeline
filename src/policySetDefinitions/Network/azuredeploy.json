@@ -1,0 +1,32 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"managementGroupId": {
+			"type": "string",
+			"metadata": {
+				"description": "Management Group ID where policy definitions have been created."
+			}
+		}
+	},
+	"resources": [
+		{
+			"type": "Microsoft.Authorization/policySetDefinitions",
+			"apiVersion": "2019-06-01",
+			"name": "network-protection",
+			"properties": {
+				"displayName": "Network Protection",
+				"description": "This initiative contains policies to harden the network perimeter.",
+				"metadata": {},
+				"parameters": {},
+				"policyDefinitions": [
+					{
+						"policyDefinitionId": "[concat('/providers/Microsoft.Management/managementGroups/', parameters('managementGroupId'), '/providers/Microsoft.Authorization/policyDefinitions/deny-public-ipaddresses')]",
+						"parameters": {}
+					}
+				]
+			}
+		}
+	],
+	"outputs": {}
+}

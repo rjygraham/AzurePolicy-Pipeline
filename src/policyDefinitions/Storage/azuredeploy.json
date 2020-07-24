@@ -1,0 +1,204 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2019-08-01/managementGroupDeploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {},
+	"resources": [
+		{
+			"type": "Microsoft.Authorization/policyDefinitions",
+			"apiVersion": "2019-06-01",
+			"name": "deny-blob-public-access",
+			"properties": {
+				"mode": "indexed",
+				"displayName": "Deny Storage Account Blob Anonymous Access",
+				"description": "This policy prevents Storage Accounts from allowing anonymous public blob access unless override tag and value is present.",
+				"metadata": {
+					"version": "1.0.0",
+					"category": "Storage"
+				},
+				"parameters": {
+					"tagName": {
+						"type": "String",
+						"metadata": {
+							"displayName": "Override Tag Name",
+							"description": "Name of the tag to override policy."
+						}
+					},
+					"tagValue": {
+						"type": "String",
+						"metadata": {
+							"displayName": "Override Tag Value",
+							"description": "Value of the tag to override policy."
+						}
+					}
+				},
+				"policyRule": {
+					"if": {
+						"allOf": [
+							{
+								"field": "type",
+								"equals": "Microsoft.Storage/storageAccounts"
+							},
+							{
+								"field": "Microsoft.Storage/storageAccounts/allowBlobPublicAccess",
+								"notEquals": "false"
+							},
+							{
+								"not": {
+									"allOf": [
+										{
+											"field": "[[concat('tags[', parameters('tagName'), ']')]",
+											"exists": "true"
+										},
+										{
+											"field": "[[concat('tags[', parameters('tagName'), ']')]",
+											"contains": "[[parameters('tagValue')]"
+										}
+									]
+								}
+							}
+						]
+					},
+					"then": {
+						"effect": "append",
+						"details": [
+							{
+								"field": "Microsoft.Storage/storageAccounts/allowBlobPublicAccess",
+								"value": "false"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Authorization/policyDefinitions",
+			"apiVersion": "2019-06-01",
+			"name": "deny-storage-account-public-access",
+			"properties": {
+				"mode": "indexed",
+				"displayName": "Deny Storage Account Public Endpoint",
+				"description": "Denies creation of Storage Accounts with public endpoints unless override tag and value is present.",
+				"metadata": {
+					"version": "1.0.0",
+					"category": "Storage"
+				},
+				"parameters": {
+					"tagName": {
+						"type": "String",
+						"metadata": {
+							"displayName": "Override Tag Name",
+							"description": "Name of the tag to override policy."
+						}
+					},
+					"tagValue": {
+						"type": "String",
+						"metadata": {
+							"displayName": "Override Tag Value",
+							"description": "Value of the tag to override policy."
+						}
+					}
+				},
+				"policyRule": {
+					"if": {
+						"allOf": [
+							{
+								"field": "type",
+								"equals": "Microsoft.Storage/storageAccounts"
+							},
+							{
+								"field": "Microsoft.Storage/storageAccounts/networkAcls.defaultAction",
+								"notEquals": "deny"
+							},
+							{
+								"not": {
+									"allOf": [
+										{
+											"field": "[[concat('tags[', parameters('tagName'), ']')]",
+											"exists": "true"
+										},
+										{
+											"field": "[[concat('tags[', parameters('tagName'), ']')]",
+											"contains": "[[parameters('tagValue')]"
+										}
+									]
+								}
+							}
+						]
+					},
+					"then": {
+						"effect": "append",
+						"details": [
+							{
+								"field": "Microsoft.Storage/storageAccounts/networkAcls.defaultAction",
+								"value": "deny"
+							}
+						]
+					}
+				}
+			}
+		},
+		{
+			"type": "Microsoft.Authorization/policyDefinitions",
+			"apiVersion": "2019-06-01",
+			"name": "deny-storage-account-iprules",
+			"properties": {
+				"mode": "indexed",
+				"displayName": "Deny Storage Account IP Rules",
+				"description": "Denies Storage Accounts from allowing IpRules being set unless override tag and value is present.",
+				"metadata": {
+					"version": "1.0.0",
+					"category": "Storage"
+				},
+				"parameters": {
+					"tagName": {
+						"type": "String",
+						"metadata": {
+							"displayName": "Override Tag Name",
+							"description": "Name of the tag to override policy."
+						}
+					},
+					"tagValue": {
+						"type": "String",
+						"metadata": {
+							"displayName": "Override Tag Value",
+							"description": "Value of the tag to override policy."
+						}
+					}
+				},
+				"policyRule": {
+					"if": {
+						"allOf": [
+							{
+								"field": "type",
+								"equals": "Microsoft.Storage/storageAccounts"
+							},
+							{
+								"count": {
+									"field": "Microsoft.Storage/storageAccounts/networkAcls.ipRules[*]"
+								},
+								"greater": 0
+							},
+							{
+								"not": {
+									"allOf": [
+										{
+											"field": "[[concat('tags[', parameters('tagName'), ']')]",
+											"exists": "true"
+										},
+										{
+											"field": "[[concat('tags[', parameters('tagName'), ']')]",
+											"contains": "[[parameters('tagValue')]"
+										}
+									]
+								}
+							}
+						]
+					},
+					"then": {
+						"effect": "deny"
+					}
+				}
+			}
+		}
+	]
+}
